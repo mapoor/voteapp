@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title></title>
+        <link rel="stylesheet" href="static/uikit/css/uikit.min.css" />
+        <script src="static/uikit/js/jquery-1.11.1.min.js"></script>
+        <script src="static/uikit/js/uikit.min.js"></script>
+        <script src="static/uikit/js/Chart.min.js"></script>
+    </head>
+    <body>
+    <div class="uk-width-large-1-1 uk-container uk-container-center">
+        <div class="uk-width-large-1-1 uk-margin-large-top"> </div>
+    <form class="uk-form">
+        <legend> <h1 class="uk-text-primary">  {{ title }} </h1> </legend>
+        <div>
+            <canvas id="myChart" width="400" height="400"></canvas>
+        </div>
+    </form>
+    <script>
+    var data = [
+    {% for item in opts %}
+        {value: {{ item[1] }}, color:"{{ item[2] }}", label: "{{ item[0] }}"},
+    {% endfor %}
+    /*{value: 50, color: "#46BFBD", label: "Green"},
+    {value: 100, color: "#FDB45C", label: "Yellow"},
+    {value: 80, color: "#949FB1", label: "gray"},
+    {value: 80, color: "#C7604C", label: ""},
+    {value: 100, color: "#4D5360", label: "dark gray"},
+    {value: 80, color: "#7D4F6D", label: "dark gray"},
+    {value: 80, color: "#9D9B7F", label: "zong"},
+    {value: 80, color: "#21323D", label: "black"},
+    {value: 80, color: "#1874CD", label: ""},
+    {value: 80, color: "#218868", label: ""},
+    {value: 80, color: "#8E8E38", label: ""},
+     */]
+    var ctx = $("#myChart").get(0).getContext("2d");
+    var opt = {animationSteps : 60}
+    var myPieChart = new Chart(ctx).Pie(data,opt);
+    </script>
+    </div>
+    </body>
+</html>
