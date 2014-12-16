@@ -71,7 +71,7 @@ $(document).ready(function(){
     		return;
     	}
 
-    	p_id = location.search.substring(1).split('=')[1]
+    	p_id = location.search.substring(1).split('=')[1];
         $.ajax({
         	type: "POST",
         	dataType: "json",

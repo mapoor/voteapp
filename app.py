@@ -1,17 +1,19 @@
 #encoding=utf-8
 # test for flask
 
+import MySQLdb
+import time
 from flask import Flask
 from flask import render_template
 from flask import request, jsonify
-import MySQLdb
-import time
+
 
 COLOR_CHART = ["#F7464A","#46BFBD","#FDB45C","#949FB1","#C7604C",\
 				"#4D5360","#7D4F6D","#9D9B7F","#21323D","#1874CD",\
 				"#218868","#8E8E38"]
 conn=MySQLdb.connect(host="localhost",user="root",passwd="",db="db_vote_web",charset="utf8")
 app = Flask(__name__)
+
 
 def parse_req():
 	title = request.form["title"]
@@ -80,7 +82,7 @@ def do_poll():
 		cursor.close()
 	except Exception,e:
 		cursor.close()
-		return jsonify({"result_code":"0", "result_msg":"success", "p_id":0})
+		return jsonify({"result_code":"-1", "result_msg":"error", "p_id":0})
 	return jsonify({"result_code":"0", "result_msg":"success", "p_id":p_id})
 
 @app.route('/show')
@@ -106,6 +108,28 @@ def show_poll():
 		return render_template("show.html", title=title)
 	#poll_id = request.args['p_id']
 	return render_template("show.html", title=title, opts=rows)
+
+@app.route('/refresh', methods=['POST'])
+def show_refresh():
+	if "p_id" not in request.form:
+		return jsonify({"result_code":"-1", "result_msg":"refresh error"})
+	p_id = request.form['p_id']
+	rows = []
+	try:
+		cursor = conn.cursor()
+		sql_s = "select FTitle,FOptionDesc,FOptionVoteNum,FState,FEndTime from t_vote_info where FVoteId=%s;"%p_id
+		res = cursor.execute(sql_s)
+		r = cursor.fetchone()
+		cursor.close()
+		title = r[0]
+		opts_desc = r[1].split('|')
+		opts_num = r[2].split('|')
+		opts_col = COLOR_CHART[:len(opts_desc)]
+		for i in range(len(opts_desc)):
+			rows.append({"label":opts_desc[i], "value":int(opts_num[i]), "color":opts_col[i]})
+		return jsonify({"result_code":"0", "result_msg":"success", "rows":rows})
+	except Exception,e:
+		return jsonify({"result_code":"-1", "result_msg":"refresh error"})
 
 
 if __name__ == '__main__':
