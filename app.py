@@ -27,6 +27,10 @@ def parse_req():
 def hello_world():
     return render_template("index.html")
 
+@app.route('/error')
+def error():
+    return render_template("error.html")
+
 @app.route('/create', methods=['POST'])
 def create_poll():
 	try:

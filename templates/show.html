@@ -19,15 +19,13 @@
 
     <script>
 $(document).ready(function(){
-    var ctx = $("#myChart").get(0).getContext("2d");
-    var opt = {animationSteps : 60};
-    
+    var ctx = $("#myChart").get(0).getContext("2d");    
     var data = [
     {% for item in opts %}
         {label: "{{ item[0] }}", value: {{ item[1] }}, color:"{{ item[2] }}"},
     {% endfor %}
     ];
-    var myPieChart = new Chart(ctx).Pie(data,opt);
+    var myPieChart = new Chart(ctx).Pie(data,{animationSteps: 60});
     
     function diff_rows(old_, new_){
         n_o = old_.length;
@@ -44,32 +42,40 @@ $(document).ready(function(){
         };
         return 0;
     };
+
+    timeout = [3,4,6,9,14,22,35,56,90,145];
+    idx_timeout = 0;
     function refresh(myChart){
         var p_id = location.search.substring(1).split('=')[1];
-        $.ajax({
+        var p_ajax = {
             type: "POST",
             dataType: "json",
             url: "/refresh",
             data: {"p_id":p_id},
+            ret: 0,
             success: function(d){
                 rows = d.rows;
                 if (diff_rows(data, rows) == 1){
                     data = rows;
                     myChart.destroy();
-                    var opt = {animation : false}
-                    var myPieChart = new Chart(ctx).Pie(data,opt);
-                    //myPieChart.update();
+                    myPieChart = new Chart(ctx).Pie(data,{animation: false});
+                    this.ret = 1;
                 }
+                this.ret = 0;
             },
             error: function(e,b,c){
                 alert("ajax error function.");
-                console.log(e);
-                console.log(b);
+            },
+            complete: function(){
+                if (this.ret != 0) idx_timeout=0; else idx_timeout++;
+                if (idx_timeout >= timeout.length) return;
+                setTimeout(refresh, timeout[idx_timeout]*1000);
             }
-        });
+        };
+        $.ajax(p_ajax);
     };
 
-    setInterval(function(){refresh(myPieChart);}, 3000);
+    setTimeout(refresh, 3000);
 });
     </script>
     </div>
