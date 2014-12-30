@@ -36,17 +36,15 @@ def create_poll():
 	try:
 		cursor = conn.cursor()  
 		uid = request.remote_addr
-		import pdb
-		pdb.set_trace()
 		vid = str(int(time.time()*100))
 		title, optn, l_dsc = parse_req()
 		optdsc = '|'.join(l_dsc)
 		optnum = '|'.join(['0']*optn)
 		sql = "insert into t_vote_info(FUid, FVoteId, FTitle, FOptionNum, \
 				FOptionDesc, FOptionVoteNum, FState, FCreateTime, FEndTime) \
-				values(\"%s\",\"%s\",\"%s\",%d,\"%s\",\"%s\",0,now(),now()+interval 1 day);" 
+				values(%s,%s,%s,%s,%s,%s,0,now(),now()+interval 1 day);" 
 		param = (uid, vid, title, optn, optdsc, optnum) 
-		res = cursor.execute(sql%param)
+		res = cursor.execute(sql, param)
 		conn.commit()
 		cursor.close()
 	except Exception,e:
@@ -58,8 +56,8 @@ def do_poll():
 	if "p_id" in request.args:
 		p_id = request.args['p_id']
 		cursor = conn.cursor()
-		sql_s = "select FTitle, FOptionDesc from t_vote_info where FVoteId=%s;"%p_id
-		res = cursor.execute(sql_s)
+		sql_s = "select FTitle, FOptionDesc from t_vote_info where FVoteId=%s;"
+		res = cursor.execute(sql_s, (p_id,))
 		r = cursor.fetchone()
 		cursor.close()
 		title = r[0]
@@ -75,13 +73,13 @@ def do_poll():
 	p_id = request.form['p_id']
 	try:
 		cursor = conn.cursor()
-		sql_s = "select FOptionVoteNum from t_vote_info where FVoteId=%s;"%p_id
-		res = cursor.execute(sql_s)
+		sql_s = "select FOptionVoteNum from t_vote_info where FVoteId=%s;"
+		res = cursor.execute(sql_s, (p_id,))
 		opt_pre = cursor.fetchone()[0].split('|')
 		opt_pre[o_id] = str(int(opt_pre[o_id])+1)
 		opt_new = '|'.join(opt_pre)
-		sql_u = "update t_vote_info set FOptionVoteNum=\"%s\" where FVoteId=\"%s\";"%(opt_new,p_id)
-		res = cursor.execute(sql_u)
+		sql_u = "update t_vote_info set FOptionVoteNum=%s where FVoteId=%s;"
+		res = cursor.execute(sql_u, (opt_new,p_id))
 		conn.commit()
 		cursor.close()
 	except Exception,e:
@@ -98,8 +96,8 @@ def show_poll():
 	rows = []
 	try:
 		cursor = conn.cursor()
-		sql_s = "select FTitle,FOptionDesc,FOptionVoteNum,FState,FEndTime from t_vote_info where FVoteId=%s;"%p_id
-		res = cursor.execute(sql_s)
+		sql_s = "select FTitle,FOptionDesc,FOptionVoteNum,FState,FEndTime from t_vote_info where FVoteId=%s;"
+		res = cursor.execute(sql_s, (p_id,))
 		r = cursor.fetchone()
 		cursor.close()
 		title = r[0]
@@ -121,8 +119,8 @@ def show_refresh():
 	rows = []
 	try:
 		cursor = conn.cursor()
-		sql_s = "select FTitle,FOptionDesc,FOptionVoteNum,FState,FEndTime from t_vote_info where FVoteId=%s;"%p_id
-		res = cursor.execute(sql_s)
+		sql_s = "select FTitle,FOptionDesc,FOptionVoteNum,FState,FEndTime from t_vote_info where FVoteId=%s;"
+		res = cursor.execute(sql_s, (p_id,))
 		r = cursor.fetchone()
 		cursor.close()
 		title = r[0]
