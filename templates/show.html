@@ -43,7 +43,7 @@ $(document).ready(function(){
         return 0;
     };
 
-    timeout = [3,4,6,9,14,22,35,56,90,145];
+    const timeout = [3,4,6,9,14,22,35,56,90,145];
     idx_timeout = 0;
     function refresh(){
         var p_id = location.search.substring(1).split('=')[1];
@@ -76,7 +76,7 @@ $(document).ready(function(){
         $.ajax(p_ajax);
     };
 
-    setTimeout(refresh, 3000);
+    setTimeout(refresh, 3*1000);
 });
     </script>
     </div>
